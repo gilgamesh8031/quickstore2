@@ -1,0 +1,1091 @@
+/* ============================================================
+   QuickStore — Stylesheet
+   Sauberes weißes Dashboard mit dunklem Warehouse-Canvas.
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:      #F0F2F5;
+  --surface: #FFFFFF;
+  --border:  #E2E6EA;
+
+  --text-hi: #111827;
+  --text-lo: #6B7280;
+
+  --blue:       #1D4ED8;
+  --amber:      #F59E0B;
+  --red:        #DC2626;
+  --green:      #16A34A;
+
+  --font-ui:   'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text-hi);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 52px;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-mark {
+  font-size: 1.3rem;
+  color: var(--blue);
+  line-height: 1;
+}
+
+.brand-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+}
+
+.status-dot.ready   { background: var(--green); }
+.status-dot.working { background: var(--amber); }
+.status-dot.error   { background: var(--red); }
+
+.status-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-lo);
+}
+
+/* ── Seitenlayout ────────────────────────────────────────────────────────── */
+
+.app-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 264px;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* ── Warehouse-Bereich ───────────────────────────────────────────────────── */
+
+.warehouse-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+
+/* Dunkle "Viewport"-Hülle für den Canvas */
+.canvas-shell {
+  background: #0F1520;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.08),
+    0 8px 32px rgba(0,0,0,0.14);
+  padding: 1.25rem 1rem 1rem;
+  display: block;
+  overflow-x: auto;
+}
+
+#warehouse-canvas {
+  display: block;
+}
+
+/* ── Farblegende ─────────────────────────────────────────────────────────── */
+
+.zone-legend {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.legend-chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-lo);
+}
+
+.legend-chip::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Chipfarben — entsprechen den "belegt"-Farben je Zone im Canvas (das ist die
+   kräftigere, erkennbare Farbe pro Zone). Ein leerer Stellplatz wirkt in jeder
+   Zone gedämpft/dunkel — dafür steht der separate "Leer"-Chip, nicht eine
+   einzelne Farbe, da "belegt" je Zone unterschiedlich aussieht. */
+.legend-frozen::before   { background: #1A3A6E; }
+.legend-chilled::before  { background: #1A5FA8; }
+.legend-ambient::before  { background: #1E5C38; }
+.legend-fresh::before    { background: #3A6E1A; }
+.legend-empty::before    { background: #2A3140; border: 1px solid #6B7280; }
+.legend-aisle::before    { background: #111827; border: 1px dashed rgba(245,158,11,0.4); }
+
+/* ── Infopanel ───────────────────────────────────────────────────────────── */
+
+.info-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.card-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 0.65rem;
+}
+
+.card-empty {
+  font-size: 0.82rem;
+  color: var(--text-lo);
+  font-style: italic;
+}
+
+/* ── Tab-Gruppe (Lieferung / Ausgabe / Bestellung / Alarme) ─────────────────── */
+
+.tab-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tab-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 7px 7px 0 0;
+  overflow: hidden;
+}
+
+.tab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.55rem 0.4rem;
+  border: none;
+  background: var(--bg);
+  color: var(--text-lo);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-btn:hover {
+  background: var(--surface);
+  color: var(--text-hi);
+}
+
+.tab-btn--active {
+  background: var(--surface);
+  color: var(--blue);
+}
+
+.tab-btn--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--blue);
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tab-panel {
+  display: none;
+  padding: 0.9rem 1rem;
+}
+
+.tab-panel--active {
+  display: block;
+}
+
+/* ── Stellplatz-Detailinhalt ─────────────────────────────────────────────── */
+
+.slot-id {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  margin-bottom: 0.6rem;
+  line-height: 1;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-key {
+  color: var(--text-lo);
+}
+
+.detail-val {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-hi);
+}
+
+/* Zonenabzeichen */
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+}
+
+.badge-ambient { background: #EFF6FF; color: var(--blue); }
+.badge-chilled { background: #DBEAFE; color: #1E40AF; }
+.badge-frozen  { background: #EDE9FE; color: #5B21B6; }
+.badge-fresh   { background: #DCFCE7; color: #166534; }
+.badge-empty   { background: var(--bg); color: var(--text-lo); }
+.badge-full    { background: #DCFCE7; color: var(--green); }
+
+/* ── Alarmeinträge ───────────────────────────────────────────────────────── */
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.alert-item:last-child {
+  border-bottom: none;
+}
+
+.alert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 0.3rem;
+  flex-shrink: 0;
+}
+
+.alert-dot-red   { background: var(--red); }
+.alert-dot-amber { background: var(--amber); }
+
+.alert-name {
+  color: var(--text-hi);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.alert-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-lo);
+  margin-top: 0.1rem;
+}
+
+.alert-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 0.22rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--blue);
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.alert-action-btn:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.alert-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--text-lo);
+  background: transparent;
+}
+
+.alert-action-btn--danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.alert-action-btn--danger:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+/* Robot is drawn on the warehouse canvas — no overlay needed. */
+
+/* ── Aktionsschaltflächen im Stellplatz-Panel ─────────────────────────────── */
+
+.slot-actions {
+  margin-top: 0.4rem;
+  border-bottom: none !important;
+  justify-content: stretch !important;
+}
+
+.btn {
+  width: 100%;
+  padding: 0.45rem 0;
+  border: none;
+  border-radius: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn:hover  { opacity: 0.85; }
+.btn:active { opacity: 0.7; }
+
+.btn-retrieve { background: #1D4ED8; color: #fff; }
+.btn-store    { background: #16A34A; color: #fff; }
+
+/* ── Lieferformular (Aktuelle Lieferung) ─────────────────────────────────── */
+
+.delivery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.form-label {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+}
+
+.form-required {
+  color: var(--red);
+}
+
+.form-input,
+.form-select {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.32rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-hi);
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+.form-input::placeholder {
+  color: var(--text-lo);
+  font-style: italic;
+}
+
+/* Disabled state for submit button */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Feedback message below the submit button */
+.delivery-msg {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-lo);
+  min-height: 1rem;
+  line-height: 1.4;
+}
+
+.delivery-msg--success { color: var(--green); }
+.delivery-msg--error   { color: var(--red); }
+
+/* ── Entnahmemenge-Eingabe im Stellplatz-Panel ───────────────────────────── */
+
+.retrieve-qty-input {
+  width: 64px;
+  text-align: right;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.78rem;
+}
+
+/* ── Chargenliste im Stellplatz-Panel ────────────────────────────────────── */
+
+.batch-loading {
+  font-style: italic;
+}
+
+.batch-list-label {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin: 0.7rem 0 0.35rem;
+}
+
+.batch-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.batch-item:last-child {
+  border-bottom: none;
+}
+
+.batch-rank {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/* First batch = next to be consumed; highlight in amber */
+.batch-item:first-child .batch-rank {
+  background: var(--amber);
+  color: #000;
+}
+
+.batch-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.batch-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.batch-ref {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.batch-qty {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  flex-shrink: 0;
+}
+
+.batch-mhd {
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  color: var(--text-lo);
+  margin-top: 1px;
+}
+
+/* MHD urgency states */
+.batch-mhd--warn     { color: var(--amber); }
+.batch-mhd--critical { color: var(--red); font-weight: 700; }
+
+/* Top border before the retrieve controls */
+.detail-row--top-border {
+  border-top: 1px solid var(--border);
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+}
+
+/* ── Alarm-Abschnitte (Bestand / Ablaufdaten) ────────────────────────────── */
+
+.alert-section-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin: 0.1rem 0 0.3rem;
+}
+
+.alert-section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.5rem 0;
+}
+
+/* ── Barcode-Scanner (in Aktuelle Lieferung) ─────────────────────────────── */
+/* Jetzt die erste, auffällige Option im Tab — nicht mehr ein unscheinbarer,
+   eingeklappter Link unterhalb des manuellen Formulars. */
+
+.scanner-section {
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.scanner-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.scanner-summary:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+}
+
+.scanner-summary::-webkit-details-marker { display: none; }
+
+.scanner-summary::after {
+  content: '▸';
+  font-size: 0.65rem;
+  transition: transform 0.15s;
+  margin-left: auto;
+}
+
+details[open] > .scanner-summary::after {
+  transform: rotate(90deg);
+}
+
+.scanner-hint {
+  font-size: 0.72rem;
+  color: var(--text-lo);
+  font-style: italic;
+  margin: 0.5rem 0 0.5rem;
+}
+
+.form-divider {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  text-align: center;
+  margin-bottom: 0.7rem;
+}
+
+.scanner-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s;
+  margin-bottom: 0.2rem;
+}
+
+.scanner-item:hover  { background: var(--bg); }
+.scanner-item:active { background: var(--border); }
+
+.scanner-barcode {
+  /* Contains the inline SVG produced by renderBarcodeSVG */
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 3px;
+  padding: 2px;
+  line-height: 0;   /* removes gap below SVG */
+  overflow: hidden;
+}
+
+.scanner-barcode svg {
+  display: block;
+  max-width: 128px;
+  height: 36px;
+}
+
+.scanner-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.scanner-name {
+  font-size: 0.76rem;
+  color: var(--text-hi);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scanner-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-lo);
+}
+
+/* ── Barcode-Bestätigungsdialog ──────────────────────────────────────────── */
+
+.barcode-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  width: min(420px, 90vw);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  background: var(--surface);
+  color: var(--text-hi);
+}
+
+.barcode-dialog::backdrop {
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+}
+
+.dialog-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 1rem;
+}
+
+.dialog-barcode-wrap {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.6rem;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+
+.dialog-barcode-wrap.awaiting-scan {
+  cursor: pointer;
+}
+
+/* ── "Tippen zum Scannen"-Hinweis ────────────────────────────────────────── */
+
+.scan-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--blue);
+  animation: hint-pulse 1.4s ease-in-out infinite;
+}
+
+.scan-hint.hidden {
+  display: none;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* ── Scan-Laser (Scananimation) ──────────────────────────────────────────── */
+
+.scan-laser {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  height: 3px;
+  top: 8%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #FF3B3B 15%, #FF3B3B 85%, transparent);
+  box-shadow: 0 0 8px 2px rgba(255, 59, 59, 0.65);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scan-laser.active {
+  opacity: 1;
+  animation: scan-sweep 0.9s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+  0%   { top: 8%; }
+  50%  { top: 88%; }
+  100% { top: 8%; }
+}
+
+.dialog-eyebrow.scanning {
+  color: var(--red);
+  animation: scan-pulse 1s ease-in-out infinite;
+}
+
+@keyframes scan-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* Data + actions fade/slide in once the "scan" resolves */
+.modal-reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.modal-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dialog-barcode-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.dialog-gs1-string {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-lo);
+  word-break: break-all;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
+}
+
+.dialog-data {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-data .detail-row {
+  font-size: 0.8rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-data .detail-row:last-child {
+  border-bottom: none;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dialog-actions .btn {
+  flex: 1;
+}
+
+.btn-cancel {
+  background: var(--bg);
+  color: var(--text-lo);
+  border: 1px solid var(--border);
+}
+
+.btn-cancel:hover { background: var(--border); }
+
+/* ── Hindernis-Steuerung ──────────────────────────────────────────────────── */
+
+.warehouse-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-toggle {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-lo);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-toggle:hover {
+  border-color: var(--amber);
+  color: var(--text-hi);
+}
+
+.btn-toggle--active {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #1A1200;
+}
+
+.btn-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-toggle:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-lo);
+}
+
+/* ── Demo-Bestellung ──────────────────────────────────────────────────────── */
+
+#demo-order-btn {
+  width: 100%;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+#demo-order-start-btn {
+  margin-top: 0.75rem;
+}
+
+.demo-receipt {
+  margin-top: 0.75rem;
+  padding: 0.7rem 0.1rem;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+}
+
+.receipt-head {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  text-align: center;
+}
+
+.receipt-sub {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text-lo);
+  text-align: center;
+  margin-top: 0.1rem;
+}
+
+.receipt-divider {
+  border-top: 1px dashed var(--border);
+  margin: 0.5rem 0;
+}
+
+.receipt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  padding: 0.18rem 0;
+  color: var(--text-hi);
+}
+
+.receipt-qty {
+  flex-shrink: 0;
+  min-width: 24px;
+  font-weight: 700;
+  color: var(--text-lo);
+}
+
+.receipt-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.receipt-status {
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.receipt-row--picking .receipt-status { color: var(--amber); }
+.receipt-row--done    .receipt-status { color: var(--green); }
+.receipt-row--failed  .receipt-status { color: var(--red); }
+.receipt-row--failed  .receipt-name   { color: var(--text-lo); text-decoration: line-through; }
+
+.receipt-footer {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-lo);
+  text-align: center;
+  margin-top: 0.1rem;
+}
+
+.receipt-footer--success { color: var(--green); font-weight: 700; }
+.receipt-footer--warn    { color: var(--amber); font-weight: 700; }
+
+.btn-ghost {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-lo);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-ghost:hover {
+  color: var(--red);
+  border-color: var(--border);
+}
+
+.obstacle-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--red);
+  margin-left: auto;
+}
+
+.obstacle-hint {
+  font-size: 0.74rem;
+  color: var(--text-lo);
+  font-style: italic;
+  margin-top: -0.2rem;
+}
+
+/* Crosshair cursor when obstacle-placement mode is active */
+#warehouse-canvas.obstacle-cursor {
+  cursor: crosshair;
+}

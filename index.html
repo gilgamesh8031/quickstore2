@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickStore — Automatisches Lagersystem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-brand">
+      <span class="brand-mark">▦</span>
+      <span class="brand-name">QuickStore</span>
+    </div>
+    <div class="header-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span class="status-label" id="status-label">Lädt…</span>
+    </div>
+  </header>
+
+  <main class="app-layout">
+
+    <!-- Links: Lagervisualisierung -->
+    <section class="warehouse-section">
+      <p class="eyebrow">Lagerplan</p>
+      <div class="canvas-shell">
+        <canvas id="warehouse-canvas"></canvas>
+      </div>
+
+      <div class="warehouse-controls">
+        <button class="btn-toggle" id="obstacle-toggle" onclick="window.toggleObstacleMode()">
+          🚧 Hindernis-Modus
+        </button>
+        <button class="btn-ghost" id="obstacle-clear" onclick="window.clearAllObstacles()">
+          Hindernisse löschen
+        </button>
+        <span class="obstacle-count" id="obstacle-count"></span>
+      </div>
+      <p class="obstacle-hint" id="obstacle-hint" style="display:none">
+        Klicken Sie auf ein Feld im Gang, um dort eine Kiste (Hindernis) zu platzieren oder zu entfernen.
+      </p>
+
+      <div class="zone-legend">
+        <span class="legend-chip legend-frozen">Tiefkühl</span>
+        <span class="legend-chip legend-chilled">Kühlung</span>
+        <span class="legend-chip legend-ambient">Trockenware</span>
+        <span class="legend-chip legend-fresh">Frische / Obst</span>
+        <span class="legend-chip legend-empty">Leer</span>
+        <span class="legend-chip legend-aisle">Hauptgang</span>
+      </div>
+    </section>
+
+    <!-- Rechts: Infopanels -->
+    <aside class="info-rail">
+
+      <!-- Stellplatz-Info: bleibt immer sichtbar, da direkt an Canvas-Klicks gekoppelt -->
+      <div class="info-card" id="slot-card">
+        <p class="card-eyebrow">Stellplatz-Info</p>
+        <p class="card-empty">Stellplatz anklicken für Details.</p>
+      </div>
+
+      <!-- Tab-Gruppe: Lieferung / Ausgabe / Bestellung / Alarme -->
+      <div class="info-card tab-card">
+        <div class="tab-nav" role="tablist">
+          <button type="button" class="tab-btn tab-btn--active" data-tab="delivery"
+                  onclick="window.switchTab('delivery')" role="tab">
+            📥 Einlagern
+          </button>
+          <button type="button" class="tab-btn" data-tab="retrieve"
+                  onclick="window.switchTab('retrieve')" role="tab">
+            📤 Ausgabe
+          </button>
+          <button type="button" class="tab-btn" data-tab="order"
+                  onclick="window.switchTab('order')" role="tab">
+            🧾 Bestellung
+            <span class="tab-badge" id="order-badge" style="display:none"></span>
+          </button>
+          <button type="button" class="tab-btn" data-tab="alerts"
+                  onclick="window.switchTab('alerts')" role="tab">
+            ⚠ Alarme
+            <span class="tab-badge" id="alerts-badge" style="display:none"></span>
+          </button>
+        </div>
+
+        <!-- Aktuelle Lieferung + eingebetteter Barcode-Scanner -->
+        <div class="tab-panel tab-panel--active" id="delivery-card" role="tabpanel">
+          <p class="card-empty">Lädt Produkte…</p>
+        </div>
+
+        <!-- Warenausgabe: Entnahme über Seitenmenü statt Stellplatz-Klick -->
+        <div class="tab-panel" id="retrieve-card" role="tabpanel">
+          <p class="card-empty">Lädt Bestand…</p>
+        </div>
+
+        <!-- Demo-Bestellung: simulierte Online-Bestellung mit Kommissionierung -->
+        <div class="tab-panel" id="demo-order-card" role="tabpanel">
+          <p class="card-empty" id="demo-order-empty">
+            Simuliert eine Online-Bestellung: mehrere Artikel in kleinen Mengen
+            werden automatisch kommissioniert und zum Versand gebracht.
+          </p>
+          <button type="button" class="btn-toggle" id="demo-order-btn" onclick="window.generateDemoOrder()">
+            🧾 Demo-Bestellung erzeugen
+          </button>
+          <div id="demo-order-body"></div>
+        </div>
+
+        <!-- Lageralarme -->
+        <div class="tab-panel" id="alerts-card" role="tabpanel">
+          <div id="alerts-body">
+            <p class="card-empty">Keine Alarme.</p>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!--
+    Barcode-Bestätigungsdialog.
+    Geöffnet durch showModal(), geschlossen durch .close() oder ESC.
+  -->
+  <dialog id="barcode-modal" class="barcode-dialog">
+    <p class="dialog-eyebrow" id="modal-eyebrow">Scanne…</p>
+
+    <div class="dialog-barcode-wrap" id="modal-barcode-wrap" onclick="window.triggerScan()">
+      <svg id="modal-barcode-svg"></svg>
+      <div class="scan-laser" id="scan-laser"></div>
+      <div class="scan-hint" id="scan-hint">👆 Barcode antippen zum Scannen</div>
+    </div>
+
+    <div class="modal-reveal" id="modal-reveal">
+      <p class="dialog-gs1-string" id="modal-gs1-string"></p>
+
+      <div class="dialog-data">
+        <div class="detail-row">
+          <span class="detail-key">Produkt</span>
+          <span class="detail-val" id="modal-product"></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Menge</span>
+          <span class="detail-val" id="modal-qty"></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">MHD</span>
+          <span class="detail-val" id="modal-mhd"></span>
+        </div>
+        <div class="detail-row" style="border-bottom:none">
+          <span class="detail-key">Charge</span>
+          <span class="detail-val" id="modal-batch"></span>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-cancel" onclick="window.cancelBarcode()">Abbrechen</button>
+        <button class="btn btn-store" id="modal-store-btn" onclick="window.confirmBarcode()">Jetzt einlagern →</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
